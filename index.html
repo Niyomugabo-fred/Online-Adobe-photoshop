@@ -3,99 +3,1298 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Online Adobe Photoshop</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <title>Photoshop UI Clone</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    canvas {
-      border: 1px solid #ccc;
-      cursor: crosshair;
+    :root {
+      --ps-dark: #1a1a1a;
+      --ps-panel: #2d2d2d;
+      --ps-light-panel: #393939;
+      --ps-highlight: #3665f3;
+      --ps-yellow: #f6c105;
+      --ps-text: #e6e6e6;
+      --ps-text-dim: #b3b3b3;
     }
+    
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 12px;
+    }
+    
+    .tool-active {
+      background-color: var(--ps-highlight);
+      border-radius: 2px;
+    }
+    
+    .layer-active {
+      background-color: rgba(54, 101, 243, 0.2);
+      border-left: 2px solid var(--ps-highlight);
+    }
+    
+    .panel-header {
+      background: linear-gradient(to bottom, #4a4a4a, #3a3a3a);
+      border-bottom: 1px solid #1a1a1a;
+    }
+    
+    .panel-tab {
+      background: linear-gradient(to bottom, #4a4a4a, #3a3a3a);
+      border: 1px solid #1a1a1a;
+      border-bottom: none;
+      border-radius: 3px 3px 0 0;
+      margin-right: 1px;
+    }
+    
+    .panel-tab.active {
+      background: linear-gradient(to bottom, #5a5a5a, #4a4a4a);
+    }
+    
+    .slider-track {
+      background: #4a4a4a;
+      height: 4px;
+      border-radius: 2px;
+    }
+    
+    .slider-thumb {
+      width: 10px;
+      height: 10px;
+      background: #e6e6e6;
+      border-radius: 50%;
+      top: -3px;
+    }
+    
+    .checkbox {
+      width: 14px;
+      height: 14px;
+      border: 1px solid #666;
+      background: #333;
+    }
+    
+    .checkbox.checked {
+      background: var(--ps-highlight);
+      border-color: #7a9cf8;
+    }
+    
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, #555, transparent);
+    }
+    
+    #canvas {
+      background-image: 
+        linear-gradient(45deg, #808080 25%, transparent 25%),
+        linear-gradient(-45deg, #808080 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #808080 75%),
+        linear-gradient(-45deg, transparent 75%, #808080 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+    
+    .tool-button {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      margin: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: var(--ps-panel);
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      z-index: 1;
+      border: 1px solid #1a1a1a;
+    }
+    
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    
+    .dropdown-item {
+      padding: 8px 16px;
+      display: block;
+    }
+    
+    .dropdown-item:hover {
+      background-color: var(--ps-highlight);
+    }
+    
+    .dropdown-divider {
+      height: 1px;
+      background-color: #1a1a1a;
+      margin: 4px 0;
+    }
+    
+    .color-picker {
+      width: 20px;
+      height: 20px;
+      border: 1px solid #666;
+      cursor: pointer;
+    }
+    
+    .foreground-color {
+      background-color: #000;
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 2px;
+      top: 2px;
+    }
+    
+    .background-color {
+      background-color: #fff;
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 6px;
+      top: 6px;
+    }
+    
+    .history-item {
+      padding: 4px 8px;
+      border-radius: 2px;
+    }
+    
+    .history-item:hover {
+      background-color: rgba(255,255,255,0.1);
+    }
+    
+    .history-item.active {
+      color: var(--ps-highlight);
+    }
+    
+    .tooltip {
+      position: absolute;
+      background-color: #333;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      white-space: nowrap;
+      z-index: 100;
+      pointer-events: none;
+    }
+    
+    .canvas-container {
+      position: relative;
+      margin: 8px;
+    }
+    
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    
+    #main-canvas {
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    
+    #drawing-canvas {
+      pointer-events: none;
+    }
+    
+    .marquee {
+      position: absolute;
+      border: 2px dashed #000;
+      background-color: rgba(0, 0, 255, 0.1);
+      pointer-events: none;
+    }
+    
+    .transform-controls {
+      position: absolute;
+      border: 1px dashed #3665f3;
+      display: none;
+    }
+    
+    .transform-handle {
+      width: 8px;
+      height: 8px;
+      background-color: #fff;
+      border: 1px solid #3665f3;
+      position: absolute;
+    }
+    
+    .transform-handle.tl { top: -4px; left: -4px; cursor: nwse-resize; }
+    .transform-handle.tr { top: -4px; right: -4px; cursor: nesw-resize; }
+    .transform-handle.bl { bottom: -4px; left: -4px; cursor: nesw-resize; }
+    .transform-handle.br { bottom: -4px; right: -4px; cursor: nwse-resize; }
+    .transform-handle.t { top: -4px; left: 50%; margin-left: -4px; cursor: ns-resize; }
+    .transform-handle.b { bottom: -4px; left: 50%; margin-left: -4px; cursor: ns-resize; }
+    .transform-handle.l { top: 50%; left: -4px; margin-top: -4px; cursor: ew-resize; }
+    .transform-handle.r { top: 50%; right: -4px; margin-top: -4px; cursor: ew-resize; }
   </style>
 </head>
-<body class="bg-gray-100 font-sans">
-  <div class="max-w-6xl mx-auto py-10">
-    <h1 class="text-3xl font-bold text-center mb-6">Online Adobe Photoshop</h1>
+<body class="bg-[var(--ps-dark)] text-[var(--ps-text)] h-screen flex flex-col overflow-hidden">
 
-    <div class="flex flex-col md:flex-row gap-6">
-      <div class="w-full md:w-3/4">
-        <canvas id="canvas" width="800" height="500" class="bg-white shadow-md"></canvas>
+
+  <div class="bg-[var(--ps-panel)] h-6 flex items-center px-2 shadow-md">
+    <div class="dropdown">
+      <button class="px-2 hover:bg-[var(--ps-light-panel)] rounded-sm">File</button>
+      <div class="dropdown-content left-0 top-6">
+        <a href="#" class="dropdown-item" id="new-file">New...</a>
+        <a href="#" class="dropdown-item" id="open-file">Open...</a>
+        <a href="#" class="dropdown-item" id="save-file">Save</a>
+        <a href="#" class="dropdown-item" id="save-as-file">Save As...</a>
+        <div class="dropdown-divider"></div>
+        <a href="#" class="dropdown-item" id="export-file">Export</a>
+        <div class="dropdown-divider"></div>
+        <a href="#" class="dropdown-item" id="exit-app">Exit</a>
       </div>
-
-      <div class="w-full md:w-1/4 bg-white p-4 rounded shadow-md">
-        <h2 class="text-lg font-semibold mb-4">Tools</h2>
-        <div class="space-y-3">
-          <button onclick="setTool('brush')" class="w-full px-4 py-2 bg-blue-600 text-white rounded">Brush</button>
-          <button onclick="setTool('eraser')" class="w-full px-4 py-2 bg-red-600 text-white rounded">Eraser</button>
-          <input type="color" id="colorPicker" class="w-full h-10 border rounded" />
-          <input type="range" id="sizePicker" min="1" max="50" value="5" class="w-full">
-          <button onclick="clearCanvas()" class="w-full px-4 py-2 bg-yellow-500 text-white rounded">Clear</button>
-          <button onclick="downloadImage()" class="w-full px-4 py-2 bg-green-600 text-white rounded">Download</button>
-        </div>
+    </div>
+    <div class="dropdown">
+      <button class="px-2 hover:bg-[var(--ps-light-panel)] rounded-sm">Edit</button>
+      <div class="dropdown-content left-0 top-6">
+        <a href="#" class="dropdown-item" id="undo-action">Undo</a>
+        <a href="#" class="dropdown-item" id="redo-action">Redo</a>
+        <div class="dropdown-divider"></div>
+        <a href="#" class="dropdown-item" id="cut-action">Cut</a>
+        <a href="#" class="dropdown-item" id="copy-action">Copy</a>
+        <a href="#" class="dropdown-item" id="paste-action">Paste</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="px-2 hover:bg-[var(--ps-light-panel)] rounded-sm">Image</button>
+      <div class="dropdown-content left-0 top-6">
+        <a href="#" class="dropdown-item" id="mode-action">Mode</a>
+        <a href="#" class="dropdown-item" id="adjustments-action">Adjustments</a>
+        <a href="#" class="dropdown-item" id="image-size-action">Image Size</a>
+        <a href="#" class="dropdown-item" id="canvas-size-action">Canvas Size</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="px-2 hover:bg-[var(--ps-light-panel)] rounded-sm">Layer</button>
+      <div class="dropdown-content left-0 top-6">
+        <a href="#" class="dropdown-item" id="new-layer">New</a>
+        <a href="#" class="dropdown-item" id="duplicate-layer">Duplicate Layer</a>
+        <a href="#" class="dropdown-item" id="delete-layer">Delete Layer</a>
+        <div class="dropdown-divider"></div>
+        <a href="#" class="dropdown-item" id="layer-style">Layer Style</a>
+        <a href="#" class="dropdown-item" id="merge-layers">Merge Layers</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="px-2 hover:bg-[var(--ps-light-panel)] rounded-sm">Select</button>
+      <div class="dropdown-content left-0 top-6">
+        <a href="#" class="dropdown-item" id="select-all">All</a>
+        <a href="#" class="dropdown-item" id="deselect">Deselect</a>
+        <div class="dropdown-divider"></div>
+        <a href="#" class="dropdown-item" id="inverse-selection">Inverse</a>
+        <a href="#" class="dropdown-item" id="feather-selection">Feather...</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="px-2 hover:bg-[var(--ps-light-panel)] rounded-sm">Filter</button>
+      <div class="dropdown-content left-0 top-6">
+        <a href="#" class="dropdown-item" id="blur-filter">Blur</a>
+        <a href="#" class="dropdown-item" id="sharpen-filter">Sharpen</a>
+        <a href="#" class="dropdown-item" id="noise-filter">Noise</a>
+        <a href="#" class="dropdown-item" id="render-filter">Render</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="px-2 hover:bg-[var(--ps-light-panel)] rounded-sm">View</button>
+      <div class="dropdown-content left-0 top-6">
+        <a href="#" class="dropdown-item" id="zoom-in">Zoom In</a>
+        <a href="#" class="dropdown-item" id="zoom-out">Zoom Out</a>
+        <div class="dropdown-divider"></div>
+        <a href="#" class="dropdown-item" id="toggle-rulers">Rulers</a>
+        <a href="#" class="dropdown-item" id="toggle-guides">Guides</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="px-2 hover:bg-[var(--ps-light-panel)] rounded-sm">Window</button>
+      <div class="dropdown-content left-0 top-6">
+        <a href="#" class="dropdown-item" id="toggle-layers">Layers</a>
+        <a href="#" class="dropdown-item" id="toggle-properties">Properties</a>
+        <a href="#" class="dropdown-item" id="toggle-history">History</a>
+        <a href="#" class="dropdown-item" id="toggle-tools">Tools</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="px-2 hover:bg-[var(--ps-light-panel)] rounded-sm">Help</button>
+      <div class="dropdown-content left-0 top-6">
+        <a href="#" class="dropdown-item" id="show-docs">Documentation</a>
+        <a href="#" class="dropdown-item" id="show-about">About</a>
       </div>
     </div>
   </div>
 
+
+  <div class="bg-[var(--ps-light-panel)] h-8 flex items-center px-2 border-b border-[#1a1a1a]">
+    <div id="move-options" class="flex items-center space-x-2 hidden">
+      <span>Auto-Select:</span>
+      <div class="checkbox checked" id="auto-select-checkbox"></div>
+      <span>Layer</span>
+      <div class="w-px h-4 bg-[#555] mx-2"></div>
+      <span>Show Transform Controls</span>
+      <div class="checkbox" id="transform-controls-checkbox"></div>
+    </div>
+    <div id="brush-options" class="flex items-center space-x-2">
+      <select class="bg-[var(--ps-panel)] border border-[#555] text-xs h-5 px-1" id="brush-type">
+        <option>Hard Round</option>
+        <option>Soft Round</option>
+        <option>Chalk</option>
+      </select>
+      <span>Size:</span>
+      <input type="range" min="1" max="100" value="10" class="slider-track w-20 appearance-none" id="brush-size">
+      <span>Opacity:</span>
+      <input type="range" min="1" max="100" value="100" class="slider-track w-20 appearance-none" id="brush-opacity">
+      <span>Flow:</span>
+      <input type="range" min="1" max="100" value="100" class="slider-track w-20 appearance-none" id="brush-flow">
+    </div>
+    <div id="marquee-options" class="flex items-center space-x-2 hidden">
+      <select class="bg-[var(--ps-panel)] border border-[#555] text-xs h-5 px-1" id="marquee-mode">
+        <option>New Selection</option>
+        <option>Add to Selection</option>
+        <option>Subtract from Selection</option>
+        <option>Intersect with Selection</option>
+      </select>
+      <span>Feather:</span>
+      <input type="number" value="0" class="w-10 bg-[var(--ps-light-panel)] border border-[#555] px-1 py-0 text-xs" id="marquee-feather">
+      <span>px</span>
+    </div>
+  </div>
+
+  <div class="flex flex-1 overflow-hidden">
+
+ 
+    <div id="toolbar" class="bg-[var(--ps-panel)] w-12 flex flex-col items-center py-2 space-y-1 border-r border-[#1a1a1a]">
+      <button class="tool-button tool hover:bg-[var(--ps-light-panel)]" data-tool="move" data-tooltip="Move Tool (V)">
+        <i class="fas fa-arrows-alt"></i>
+      </button>
+      <button class="tool-button tool hover:bg-[var(--ps-light-panel)]" data-tool="marquee" data-tooltip="Rectangular Marquee Tool (M)">
+        <i class="far fa-square"></i>
+      </button>
+      <button class="tool-button tool hover:bg-[var(--ps-light-panel)]" data-tool="lasso" data-tooltip="Lasso Tool (L)">
+        <i class="fas fa-pencil-alt" style="transform: rotate(-45deg) scaleX(0.8);"></i>
+      </button>
+      <button class="tool-button tool hover:bg-[var(--ps-light-panel)]" data-tool="crop" data-tooltip="Crop Tool (C)">
+        <i class="fas fa-crop"></i>
+      </button>
+      <button class="tool-button tool hover:bg-[var(--ps-light-panel)]" data-tool="eyedropper" data-tooltip="Eyedropper Tool (I)">
+        <i class="fas fa-eye-dropper"></i>
+      </button>
+      <button class="tool-button tool hover:bg-[var(--ps-light-panel)]" data-tool="brush" data-tooltip="Brush Tool (B)">
+        <i class="fas fa-paint-brush"></i>
+      </button>
+      <button class="tool-button tool hover:bg-[var(--ps-light-panel)]" data-tool="clone" data-tooltip="Clone Stamp Tool (S)">
+        <i class="fas fa-stamp"></i>
+      </button>
+      <button class="tool-button tool hover:bg-[var(--ps-light-panel)]" data-tool="eraser" data-tooltip="Eraser Tool (E)">
+        <i class="fas fa-eraser"></i>
+      </button>
+      <button class="tool-button tool hover:bg-[var(--ps-light-panel)]" data-tool="gradient" data-tooltip="Gradient Tool (G)">
+        <i class="fas fa-sliders-h" style="transform: rotate(90deg);"></i>
+      </button>
+      <button class="tool-button tool hover:bg-[var(--ps-light-panel)]" data-tool="blur" data-tooltip="Blur Tool (R)">
+        <i class="fas fa-water"></i>
+      </button>
+      <button class="tool-button tool hover:bg-[var(--ps-light-panel)]" data-tool="pen" data-tooltip="Pen Tool (P)">
+        <i class="fas fa-pen"></i>
+      </button>
+      <button class="tool-button tool hover:bg-[var(--ps-light-panel)]" data-tool="text" data-tooltip="Type Tool (T)">
+        <i class="fas fa-font"></i>
+      </button>
+      
+      <div class="h-px w-full bg-[#555] my-1"></div>
+      
+      <div class="relative color-picker" id="color-picker">
+        <div class="foreground-color" id="foreground-color"></div>
+        <div class="background-color" id="background-color"></div>
+      </div>
+      <button class="tool-button" id="switch-colors" data-tooltip="Switch Colors (X)">
+        <i class="fas fa-exchange-alt" style="transform: rotate(90deg);"></i>
+      </button>
+      <button class="tool-button" id="default-colors" data-tooltip="Default Colors (D)">
+        <div style="width: 14px; height: 14px; border: 1px solid #666; position: relative;">
+          <div style="position: absolute; width: 12px; height: 12px; left: 1px; top: 1px; background: black;"></div>
+          <div style="position: absolute; width: 12px; height: 12px; left: 4px; top: 4px; background: white;"></div>
+        </div>
+      </button>
+    </div>
+
+    <div class="flex-1 bg-[#808080] flex flex-col items-center justify-center overflow-auto">
+      <div id="canvas-container" class="canvas-container">
+        <canvas id="main-canvas" width="800" height="500"></canvas>
+        <canvas id="drawing-canvas" width="800" height="500"></canvas>
+        <div id="marquee-selection" class="marquee" style="display: none;"></div>
+        <div id="transform-controls" class="transform-controls">
+          <div class="transform-handle tl"></div>
+          <div class="transform-handle tr"></div>
+          <div class="transform-handle bl"></div>
+          <div class="transform-handle br"></div>
+          <div class="transform-handle t"></div>
+          <div class="transform-handle b"></div>
+          <div class="transform-handle l"></div>
+          <div class="transform-handle r"></div>
+        </div>
+      </div>
+    </div>
+
+  
+    <div class="bg-[var(--ps-panel)] w-64 flex flex-col border-l border-[#1a1a1a]">
+   
+      <div class="flex panel-header">
+        <div class="panel-tab active px-3 py-1" data-panel="layers">Layers</div>
+        <div class="panel-tab px-3 py-1" data-panel="properties">Properties</div>
+        <div class="panel-tab px-3 py-1" data-panel="history">History</div>
+      </div>
+      
+ 
+      <div id="layers-panel" class="flex-1 p-2 overflow-y-auto">
+        <div class="flex justify-between items-center mb-2">
+          <div class="flex space-x-2">
+            <button class="tool-button hover:bg-[var(--ps-light-panel)]" id="new-layer-btn">
+              <i class="fas fa-plus"></i>
+            </button>
+            <button class="tool-button hover:bg-[var(--ps-light-panel)]" id="delete-layer-btn">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div id="layers-list" class="space-y-1">
+          <div class="layer flex items-center p-1 rounded cursor-pointer">
+            <div class="w-4 h-4 mr-2 flex items-center justify-center">
+              <i class="fas fa-eye text-xs"></i>
+            </div>
+            <div class="flex-1 truncate">Background</div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div id="properties-panel" class="hidden flex-1 p-2 overflow-y-auto">
+        <div class="space-y-3">
+          <div>
+            <div class="text-xs text-[var(--ps-text-dim)] mb-1">Layer</div>
+            <input type="text" value="Layer 1" class="w-full bg-[var(--ps-light-panel)] border border-[#555] px-2 py-1 text-sm" id="layer-name">
+          </div>
+          
+          <div>
+            <div class="text-xs text-[var(--ps-text-dim)] mb-1">Opacity</div>
+            <div class="flex items-center">
+              <input type="range" min="0" max="100" value="100" class="slider-track flex-1 appearance-none" id="layer-opacity">
+              <input type="number" value="100" class="w-10 bg-[var(--ps-light-panel)] border border-[#555] px-1 py-0 ml-2 text-xs" id="layer-opacity-value">%
+            </div>
+          </div>
+          
+          <div>
+            <div class="text-xs text-[var(--ps-text-dim)] mb-1">Fill</div>
+            <div class="flex items-center">
+              <input type="range" min="0" max="100" value="100" class="slider-track flex-1 appearance-none" id="layer-fill">
+              <input type="number" value="100" class="w-10 bg-[var(--ps-light-panel)] border border-[#555] px-1 py-0 ml-2 text-xs" id="layer-fill-value">%
+            </div>
+          </div>
+          
+          <div class="divider my-2"></div>
+          
+          <div>
+            <div class="text-xs text-[var(--ps-text-dim)] mb-1">Blending Mode</div>
+            <select class="w-full bg-[var(--ps-light-panel)] border border-[#555] px-2 py-1 text-sm" id="blend-mode">
+              <option>Normal</option>
+              <option>Multiply</option>
+              <option>Screen</option>
+              <option>Overlay</option>
+              <option>Soft Light</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+     
+      <div id="history-panel" class="hidden flex-1 p-2 overflow-y-auto">
+        <div id="history-list" class="space-y-1">
+          <div class="history-item active">Current State</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+ 
+  <div class="bg-[var(--ps-panel)] h-5 flex items-center px-2 text-xs border-t border-[#1a1a1a]">
+    <div class="mr-4">Document: <span id="document-size">800 x 500</span> @ 72 ppi</div>
+    <div class="mr-4">Zoom: <span id="zoom-level">100%</span></div>
+    <div class="ml-auto">BrowserShop</div>
+  </div>
+
+  <div id="tooltip" class="tooltip"></div>
+
+
+  <input type="file" id="file-input" accept="image/*" style="display: none;">
+
   <script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    let painting = false;
-    let tool = "brush";
-    let brushColor = "#000000";
-    let brushSize = 5;
-
-    canvas.addEventListener("mousedown", startPosition);
-    canvas.addEventListener("mouseup", endPosition);
-    canvas.addEventListener("mousemove", draw);
-
-    document.getElementById("colorPicker").addEventListener("change", e => {
-      brushColor = e.target.value;
-    });
-
-    document.getElementById("sizePicker").addEventListener("input", e => {
-      brushSize = e.target.value;
-    });
-
-    function setTool(selectedTool) {
-      tool = selectedTool;
+    
+    const mainCanvas = document.getElementById('main-canvas');
+    const mainCtx = mainCanvas.getContext('2d');
+    const drawingCanvas = document.getElementById('drawing-canvas');
+    const drawingCtx = drawingCanvas.getContext('2d');
+    
+ 
+    mainCtx.fillStyle = '#ffffff';
+    mainCtx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
+    
+   
+    const tools = document.querySelectorAll('.tool');
+    let activeTool = 'brush';
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    let currentLayer = 0;
+    let layers = [{
+      name: 'Background',
+      visible: true,
+      locked: false,
+      opacity: 100,
+      fill: 100,
+      blendMode: 'Normal'
+    }];
+    
+ 
+    let brushSize = 10;
+    let brushOpacity = 100;
+    let brushFlow = 100;
+    let brushType = 'Hard Round';
+    let foregroundColor = '#000000';
+    let backgroundColor = '#ffffff';
+    
+   
+    let marqueeStartX = 0;
+    let marqueeStartY = 0;
+    let marqueeEndX = 0;
+    let marqueeEndY = 0;
+    let isSelecting = false;
+    
+   
+    let isTransforming = false;
+    let transformStartX = 0;
+    let transformStartY = 0;
+    let transformHandle = '';
+    
+  
+    let history = [];
+    let historyIndex = -1;
+    
+   
+    function initUI() {
+    
+      document.querySelector('[data-tool="brush"]').click();
+      
+   
+      document.getElementById('foreground-color').style.backgroundColor = foregroundColor;
+      document.getElementById('background-color').style.backgroundColor = backgroundColor;
+      
+    
+      document.getElementById('brush-size').value = brushSize;
+      document.getElementById('brush-opacity').value = brushOpacity;
+      document.getElementById('brush-flow').value = brushFlow;
+      document.getElementById('brush-type').value = brushType;
+      
+     
+      document.getElementById('layer-name').value = layers[currentLayer].name;
+      document.getElementById('layer-opacity').value = layers[currentLayer].opacity;
+      document.getElementById('layer-opacity-value').value = layers[currentLayer].opacity;
+      document.getElementById('layer-fill').value = layers[currentLayer].fill;
+      document.getElementById('layer-fill-value').value = layers[currentLayer].fill;
+      document.getElementById('blend-mode').value = layers[currentLayer].blendMode;
+      
+     
+      addEventListeners();
     }
+    
+   
+    function addEventListeners() {
+     
+      tools.forEach(tool => {
+        tool.addEventListener('click', () => {
+          tools.forEach(t => t.classList.remove('tool-active'));
+          tool.classList.add('tool-active');
+          activeTool = tool.dataset.tool;
+          
+        
+          document.getElementById('move-options').classList.add('hidden');
+          document.getElementById('brush-options').classList.add('hidden');
+          document.getElementById('marquee-options').classList.add('hidden');
+          
+          if (activeTool === 'move') {
+            document.getElementById('move-options').classList.remove('hidden');
+          } else if (activeTool === 'brush' || activeTool === 'eraser') {
+            document.getElementById('brush-options').classList.remove('hidden');
+          } else if (activeTool === 'marquee') {
+            document.getElementById('marquee-options').classList.remove('hidden');
+          }
+        });
+      });
+      
+   
+      mainCanvas.addEventListener('mousedown', startDrawing);
+      mainCanvas.addEventListener('mousemove', draw);
+      mainCanvas.addEventListener('mouseup', stopDrawing);
+      mainCanvas.addEventListener('mouseout', stopDrawing);
+      
+     
+      document.getElementById('brush-size').addEventListener('input', (e) => {
+        brushSize = e.target.value;
+      });
+      
+      document.getElementById('brush-opacity').addEventListener('input', (e) => {
+        brushOpacity = e.target.value;
+      });
+      
+      document.getElementById('brush-flow').addEventListener('input', (e) => {
+        brushFlow = e.target.value;
+      });
+      
+      document.getElementById('brush-type').addEventListener('change', (e) => {
+        brushType = e.target.value;
+      });
+      
+    
+      document.getElementById('color-picker').addEventListener('click', () => {
+        const color = prompt('Enter a color (hex, rgb, or name):', foregroundColor);
+        if (color) {
+          foregroundColor = color;
+          document.getElementById('foreground-color').style.backgroundColor = foregroundColor;
+        }
+      });
+      
+      document.getElementById('switch-colors').addEventListener('click', () => {
+        const temp = foregroundColor;
+        foregroundColor = backgroundColor;
+        backgroundColor = temp;
+        document.getElementById('foreground-color').style.backgroundColor = foregroundColor;
+        document.getElementById('background-color').style.backgroundColor = backgroundColor;
+      });
+      
+      document.getElementById('default-colors').addEventListener('click', () => {
+        foregroundColor = '#000000';
+        backgroundColor = '#ffffff';
+        document.getElementById('foreground-color').style.backgroundColor = foregroundColor;
+        document.getElementById('background-color').style.backgroundColor = backgroundColor;
+      });
+      
+     
+      document.getElementById('new-layer-btn').addEventListener('click', addNewLayer);
+      document.getElementById('delete-layer-btn').addEventListener('click', deleteCurrentLayer);
+      
+      document.getElementById('layer-name').addEventListener('change', (e) => {
+        layers[currentLayer].name = e.target.value;
+        updateLayersList();
+      });
+      
+      document.getElementById('layer-opacity').addEventListener('input', (e) => {
+        layers[currentLayer].opacity = e.target.value;
+        document.getElementById('layer-opacity-value').value = e.target.value;
+        redrawCanvas();
+      });
+      
+      document.getElementById('layer-opacity-value').addEventListener('change', (e) => {
+        layers[currentLayer].opacity = e.target.value;
+        document.getElementById('layer-opacity').value = e.target.value;
+        redrawCanvas();
+      });
+      
+      document.getElementById('layer-fill').addEventListener('input', (e) => {
+        layers[currentLayer].fill = e.target.value;
+        document.getElementById('layer-fill-value').value = e.target.value;
+        redrawCanvas();
+      });
+      
+      document.getElementById('layer-fill-value').addEventListener('change', (e) => {
+        layers[currentLayer].fill = e.target.value;
+        document.getElementById('layer-fill').value = e.target.value;
+        redrawCanvas();
+      });
+      
+      document.getElementById('blend-mode').addEventListener('change', (e) => {
+        layers[currentLayer].blendMode = e.target.value;
+        redrawCanvas();
+      });
+      
 
-    function startPosition(e) {
-      painting = true;
-      draw(e);
+      document.querySelectorAll('.panel-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          
+          document.getElementById('layers-panel').classList.add('hidden');
+          document.getElementById('properties-panel').classList.add('hidden');
+          document.getElementById('history-panel').classList.add('hidden');
+          
+          if (tab.dataset.panel === 'layers') {
+            document.getElementById('layers-panel').classList.remove('hidden');
+          } else if (tab.dataset.panel === 'properties') {
+            document.getElementById('properties-panel').classList.remove('hidden');
+          } else if (tab.dataset.panel === 'history') {
+            document.getElementById('history-panel').classList.remove('hidden');
+          }
+        });
+      });
+      
+
+      document.getElementById('new-file').addEventListener('click', newFile);
+      document.getElementById('open-file').addEventListener('click', () => {
+        document.getElementById('file-input').click();
+      });
+      document.getElementById('save-file').addEventListener('click', saveFile);
+      document.getElementById('save-as-file').addEventListener('click', saveAsFile);
+      document.getElementById('export-file').addEventListener('click', exportFile);
+      
+      document.getElementById('file-input').addEventListener('change', openFile);
+      
+
+      document.getElementById('undo-action').addEventListener('click', undo);
+      document.getElementById('redo-action').addEventListener('click', redo);
+      document.getElementById('cut-action').addEventListener('click', cut);
+      document.getElementById('copy-action').addEventListener('click', copy);
+      document.getElementById('paste-action').addEventListener('click', paste);
+      
+
+      document.getElementById('zoom-in').addEventListener('click', () => zoomCanvas(1.1));
+      document.getElementById('zoom-out').addEventListener('click', () => zoomCanvas(0.9));
+      
+ 
+      document.getElementById('auto-select-checkbox').addEventListener('click', toggleCheckbox);
+      document.getElementById('transform-controls-checkbox').addEventListener('click', toggleCheckbox);
+      
+
+      const tooltip = document.getElementById('tooltip');
+      
+      document.querySelectorAll('[data-tooltip]').forEach(el => {
+        el.addEventListener('mouseenter', (e) => {
+          const rect = el.getBoundingClientRect();
+          tooltip.textContent = el.dataset.tooltip;
+          tooltip.style.left = `${rect.left}px`;
+          tooltip.style.top = `${rect.bottom + 4}px`;
+          tooltip.style.display = 'block';
+        });
+        
+        el.addEventListener('mouseleave', () => {
+          tooltip.style.display = 'none';
+        });
+      });
     }
+    
 
-    function endPosition() {
-      painting = false;
-      ctx.beginPath();
+    function startDrawing(e) {
+      if (layers[currentLayer].locked) return;
+      
+      if (activeTool === 'brush' || activeTool === 'eraser') {
+        isDrawing = true;
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+        draw(e);
+      } else if (activeTool === 'marquee') {
+        isSelecting = true;
+        marqueeStartX = e.offsetX;
+        marqueeStartY = e.offsetY;
+        marqueeEndX = e.offsetX;
+        marqueeEndY = e.offsetY;
+        updateMarqueeSelection();
+      } else if (activeTool === 'move') {
+        if (document.getElementById('transform-controls').style.display === 'block') {
+          const transformControls = document.getElementById('transform-controls');
+          const rect = transformControls.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const mouseY = e.clientY - rect.top;
+          
+
+          const handles = document.querySelectorAll('.transform-handle');
+          let handleFound = false;
+          
+          handles.forEach(handle => {
+            const handleRect = handle.getBoundingClientRect();
+            if (e.clientX >= handleRect.left && e.clientX <= handleRect.right &&
+                e.clientY >= handleRect.top && e.clientY <= handleRect.bottom) {
+              transformHandle = handle.classList[1];
+              isTransforming = true;
+              transformStartX = e.clientX;
+              transformStartY = e.clientY;
+              handleFound = true;
+            }
+          });
+          
+          if (!handleFound && e.clientX >= rect.left && e.clientX <= rect.right &&
+              e.clientY >= rect.top && e.clientY <= rect.bottom) {
+
+            transformHandle = 'move';
+            isTransforming = true;
+            transformStartX = e.clientX;
+            transformStartY = e.clientY;
+          }
+        }
+      }
     }
-
+    
     function draw(e) {
-      if (!painting) return;
-
-      ctx.lineWidth = brushSize;
-      ctx.lineCap = "round";
-      ctx.strokeStyle = tool === 'eraser' ? '#ffffff' : brushColor;
-
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      ctx.lineTo(x, y);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(x, y);
+      if (!isDrawing && !isSelecting && !isTransforming) return;
+      
+      if (activeTool === 'brush' || activeTool === 'eraser') {
+        if (!isDrawing) return;
+        
+        drawingCtx.lineJoin = 'round';
+        drawingCtx.lineCap = 'round';
+        drawingCtx.lineWidth = brushSize;
+        
+        if (activeTool === 'brush') {
+          drawingCtx.strokeStyle = foregroundColor;
+          drawingCtx.globalAlpha = brushOpacity / 100;
+        } else { 
+          drawingCtx.strokeStyle = '#ffffff';
+          drawingCtx.globalAlpha = 1;
+        }
+        
+        drawingCtx.beginPath();
+        drawingCtx.moveTo(lastX, lastY);
+        drawingCtx.lineTo(e.offsetX, e.offsetY);
+        drawingCtx.stroke();
+        
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+      } else if (activeTool === 'marquee' && isSelecting) {
+        marqueeEndX = e.offsetX;
+        marqueeEndY = e.offsetY;
+        updateMarqueeSelection();
+      } else if (activeTool === 'move' && isTransforming) {
+        const deltaX = e.clientX - transformStartX;
+        const deltaY = e.clientY - transformStartY;
+        
+        const transformControls = document.getElementById('transform-controls');
+        const rect = transformControls.getBoundingClientRect();
+        const canvasRect = mainCanvas.getBoundingClientRect();
+        
+        if (transformHandle === 'move') {
+          transformControls.style.left = `${rect.left - canvasRect.left + deltaX}px`;
+          transformControls.style.top = `${rect.top - canvasRect.top + deltaY}px`;
+        } else {
+         
+          let newWidth = rect.width;
+          let newHeight = rect.height;
+          let newLeft = rect.left - canvasRect.left;
+          let newTop = rect.top - canvasRect.top;
+          
+          if (transformHandle.includes('t')) {
+            newHeight -= deltaY;
+            newTop += deltaY;
+          }
+          if (transformHandle.includes('b')) {
+            newHeight += deltaY;
+          }
+          if (transformHandle.includes('l')) {
+            newWidth -= deltaX;
+            newLeft += deltaX;
+          }
+          if (transformHandle.includes('r')) {
+            newWidth += deltaX;
+          }
+          
+          transformControls.style.width = `${newWidth}px`;
+          transformControls.style.height = `${newHeight}px`;
+          transformControls.style.left = `${newLeft}px`;
+          transformControls.style.top = `${newTop}px`;
+        }
+        
+        transformStartX = e.clientX;
+        transformStartY = e.clientY;
+      }
     }
+    
+    function stopDrawing() {
+      if (isDrawing) {
+        isDrawing = false;
+        
+       
+        mainCtx.drawImage(drawingCanvas, 0, 0);
+        drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        
+       
+        saveToHistory();
+      } else if (isSelecting) {
+        isSelecting = false;
+        
 
-    function clearCanvas() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (document.getElementById('transform-controls-checkbox').classList.contains('checked')) {
+          const marquee = document.getElementById('marquee-selection');
+          const transformControls = document.getElementById('transform-controls');
+          
+          transformControls.style.left = `${parseInt(marquee.style.left)}px`;
+          transformControls.style.top = `${parseInt(marquee.style.top)}px`;
+          transformControls.style.width = `${parseInt(marquee.style.width)}px`;
+          transformControls.style.height = `${parseInt(marquee.style.height)}px`;
+          transformControls.style.display = 'block';
+        }
+      } else if (isTransforming) {
+        isTransforming = false;
+      }
     }
+    
+    function updateMarqueeSelection() {
+      const marquee = document.getElementById('marquee-selection');
+      const left = Math.min(marqueeStartX, marqueeEndX);
+      const top = Math.min(marqueeStartY, marqueeEndY);
+      const width = Math.abs(marqueeEndX - marqueeStartX);
+      const height = Math.abs(marqueeEndY - marqueeStartY);
+      
+      marquee.style.left = `${left}px`;
+      marquee.style.top = `${top}px`;
+      marquee.style.width = `${width}px`;
+      marquee.style.height = `${height}px`;
+      marquee.style.display = 'block';
+    }
+    
+  
+    function addNewLayer() {
+      const newLayer = {
+        name: `Layer ${layers.length + 1}`,
+        visible: true,
+        locked: false,
+        opacity: 100,
+        fill: 100,
+        blendMode: 'Normal',
+        canvas: document.createElement('canvas'),
+        ctx: null
+      };
+      
+      newLayer.canvas.width = mainCanvas.width;
+      newLayer.canvas.height = mainCanvas.height;
+      newLayer.ctx = newLayer.canvas.getContext('2d');
+      newLayer.ctx.fillStyle = 'transparent';
+      newLayer.ctx.fillRect(0, 0, newLayer.canvas.width, newLayer.canvas.height);
+      
+      layers.push(newLayer);
+      currentLayer = layers.length - 1;
+      updateLayersList();
+      updatePropertiesPanel();
+    }
+    
+    function deleteCurrentLayer() {
+      if (layers.length <= 1) return; 
+      
+      layers.splice(currentLayer, 1);
+      if (currentLayer >= layers.length) {
+        currentLayer = layers.length - 1;
+      }
+      
+      updateLayersList();
+      updatePropertiesPanel();
+      redrawCanvas();
+      saveToHistory();
+    }
+    
+    function updateLayersList() {
+      const layersList = document.getElementById('layers-list');
+      layersList.innerHTML = '';
+      
+      layers.forEach((layer, index) => {
+        const layerElement = document.createElement('div');
+        layerElement.className = `layer flex items-center p-1 rounded cursor-pointer ${index === currentLayer ? 'layer-active' : ''}`;
+        
+        layerElement.innerHTML = `
+          <div class="w-4 h-4 mr-2 flex items-center justify-center">
+            <i class="fas ${layer.visible ? 'fa-eye' : 'fa-eye-slash'} text-xs"></i>
+          </div>
+          <div class="flex-1 truncate ${layer.visible ? '' : 'text-[var(--ps-text-dim)]'}">${layer.name}</div>
+          <div class="w-4 h-4 ml-2 flex items-center justify-center">
+            <i class="fas ${layer.locked ? 'fa-lock' : 'fa-lock-open'} text-xs"></i>
+          </div>
+        `;
+        
+        layerElement.addEventListener('click', (e) => {
+          
+          if (e.target.classList.contains('fa-eye') || e.target.classList.contains('fa-eye-slash')) {
+            layer.visible = !layer.visible;
+            updateLayersList();
+            redrawCanvas();
+            return;
+          }
+          
+          if (e.target.classList.contains('fa-lock') || e.target.classList.contains('fa-lock-open')) {
+            layer.locked = !layer.locked;
+            updateLayersList();
+            return;
+          }
+          
+          if (e.target.closest('.fa-eye') || e.target.closest('.fa-lock')) {
+            return;
+          }
+          
+          currentLayer = index;
+          updateLayersList();
+          updatePropertiesPanel();
+        });
+        
+        layersList.appendChild(layerElement);
+      });
+    }
+    
+    function updatePropertiesPanel() {
+      const layer = layers[currentLayer];
+      document.getElementById('layer-name').value = layer.name;
+      document.getElementById('layer-opacity').value = layer.opacity;
+      document.getElementById('layer-opacity-value').value = layer.opacity;
+      document.getElementById('layer-fill').value = layer.fill;
+      document.getElementById('layer-fill-value').value = layer.fill;
+      document.getElementById('blend-mode').value = layer.blendMode;
+    }
+    
+    function redrawCanvas() {
+      mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+      
+    
+      mainCtx.fillStyle = '#ffffff';
+      mainCtx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
+      
+  
+      layers.forEach(layer => {
+        if (layer.visible) {
+          mainCtx.globalAlpha = layer.opacity / 100;
+     
+          mainCtx.drawImage(layer.canvas, 0, 0);
+        }
+      });
+      
+      mainCtx.globalAlpha = 1;
+    }
+    
 
-    function downloadImage() {
+    function newFile() {
+      const width = prompt('Width (px):', '800');
+      const height = prompt('Height (px):', '500');
+      
+      if (width && height) {
+        mainCanvas.width = parseInt(width);
+        mainCanvas.height = parseInt(height);
+        drawingCanvas.width = parseInt(width);
+        drawingCanvas.height = parseInt(height);
+        
+      
+        layers = [{
+          name: 'Background',
+          visible: true,
+          locked: false,
+          opacity: 100,
+          fill: 100,
+          blendMode: 'Normal'
+        }];
+        currentLayer = 0;
+        
+   
+        mainCtx.fillStyle = '#ffffff';
+        mainCtx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
+        drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        
+       
+        updateLayersList();
+        updatePropertiesPanel();
+        document.getElementById('document-size').textContent = `${width} x ${height}`;
+        saveToHistory();
+      }
+    }
+    
+    function openFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          mainCanvas.width = img.width;
+          mainCanvas.height = img.height;
+          drawingCanvas.width = img.width;
+          drawingCanvas.height = img.height;
+          
+          mainCtx.drawImage(img, 0, 0);
+          
+         
+          layers = [{
+            name: 'Background',
+            visible: true,
+            locked: false,
+            opacity: 100,
+            fill: 100,
+            blendMode: 'Normal',
+            canvas: mainCanvas,
+            ctx: mainCtx
+          }];
+          currentLayer = 0;
+          
+          updateLayersList();
+          updatePropertiesPanel();
+          document.getElementById('document-size').textContent = `${img.width} x ${img.height}`;
+          saveToHistory();
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    function saveFile() {
       const link = document.createElement('a');
-      link.download = 'drawing.png';
-      link.href = canvas.toDataURL();
+      link.download = 'image.png';
+      link.href = mainCanvas.toDataURL('image/png');
       link.click();
     }
+    
+    function saveAsFile() {
+      const fileName = prompt('File name:', 'image.png');
+      if (fileName) {
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = mainCanvas.toDataURL('image/png');
+        link.click();
+      }
+    }
+    
+    function exportFile() {
+      const format = prompt('Export format (png, jpg, webp):', 'png');
+      if (format) {
+        let mimeType;
+        switch (format.toLowerCase()) {
+          case 'jpg':
+          case 'jpeg':
+            mimeType = 'image/jpeg';
+            break;
+          case 'webp':
+            mimeType = 'image/webp';
+            break;
+          default:
+            mimeType = 'image/png';
+        }
+        
+        const link = document.createElement('a');
+        link.download = `image.${format}`;
+        link.href = mainCanvas.toDataURL(mimeType);
+        link.click();
+      }
+    }
+    
+   
+    function undo() {
+      if (historyIndex > 0) {
+        historyIndex--;
+        restoreFromHistory();
+      }
+    }
+    
+    function redo() {
+      if (historyIndex < history.length - 1) {
+        historyIndex++;
+        restoreFromHistory();
+      }
+    }
+    
+    function cut() {
+    
+      alert('Cut functionality would be implemented here');
+    }
+    
+    function copy() {
+     
+      alert('Copy functionality would be implemented here');
+    }
+    
+    function paste() {
+     
+      alert('Paste functionality would be implemented here');
+    }
+    
+   
+    function saveToHistory() {
+    
+      if (historyIndex < history.length - 1) {
+        history = history.slice(0, historyIndex + 1);
+      }
+      
+     
+      const canvasState = mainCanvas.toDataURL();
+      history.push(canvasState);
+      historyIndex = history.length - 1;
+      
+     
+      updateHistoryPanel();
+    }
+    
+    function restoreFromHistory() {
+      if (historyIndex >= 0 && historyIndex < history.length) {
+        const img = new Image();
+        img.onload = function() {
+          mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+          mainCtx.drawImage(img, 0, 0);
+        };
+        img.src = history[historyIndex];
+      }
+      
+    
+      updateHistoryPanel();
+    }
+    
+    function updateHistoryPanel() {
+      const historyList = document.getElementById('history-list');
+      historyList.innerHTML = '';
+      
+      history.forEach((state, index) => {
+        const historyItem = document.createElement('div');
+        historyItem.className = `history-item ${index === historyIndex ? 'active' : ''}`;
+        historyItem.textContent = index === 0 ? 'New Document' : `Action ${index}`;
+        
+        historyItem.addEventListener('click', () => {
+          historyIndex = index;
+          restoreFromHistory();
+        });
+        
+        historyList.appendChild(historyItem);
+      });
+    }
+    
+    
+    function zoomCanvas(factor) {
+      const canvasContainer = document.getElementById('canvas-container');
+      const currentTransform = window.getComputedStyle(canvasContainer).transform;
+      
+      let currentScale = 1;
+      if (currentTransform !== 'none') {
+        const matrix = currentTransform.match(/^matrix\(([^)]*)\)$/)[1].split(', ');
+        currentScale = parseFloat(matrix[0]);
+      }
+      
+      const newScale = currentScale * factor;
+      canvasContainer.style.transform = `scale(${newScale})`;
+      document.getElementById('zoom-level').textContent = `${Math.round(newScale * 100)}%`;
+    }
+    
+  
+    function toggleCheckbox(e) {
+      e.target.classList.toggle('checked');
+      
+      if (e.target.id === 'transform-controls-checkbox') {
+        const marquee = document.getElementById('marquee-selection');
+        if (marquee.style.display === 'block' && e.target.classList.contains('checked')) {
+          const transformControls = document.getElementById('transform-controls');
+          transformControls.style.left = `${parseInt(marquee.style.left)}px`;
+          transformControls.style.top = `${parseInt(marquee.style.top)}px`;
+          transformControls.style.width = `${parseInt(marquee.style.width)}px`;
+          transformControls.style.height = `${parseInt(marquee.style.height)}px`;
+          transformControls.style.display = 'block';
+        } else {
+          document.getElementById('transform-controls').style.display = 'none';
+        }
+      }
+    }
+    
+   
+    window.addEventListener('load', initUI);
   </script>
+
 </body>
 </html>
