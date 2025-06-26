@@ -1,6 +1,7 @@
 🖌️ Online-Adobe-Photoshop
 A powerful web-based image editing tool inspired by Adobe Photoshop – built for creatives, designers, and developers who need fast, accessible, and intuitive photo manipulation right from their browser. No installation required.
 
+
 ✨ Features:
 Layers, filters, and blending modes
 
@@ -15,9 +16,9 @@ Mobile-friendly and responsive design
 Saves and exports images in multiple formats (JPG, PNG, WebP, etc.)
 
 🚀 Tech Stack:
-HTML5, CSS3, JavaScript (Vanilla or Framework)
+HTML5, tailwind css, JavaScript
 
-Canvas API / WebGL (if used)
+Canvas API / WebGL 
 
 Optional: Tailwind CSS or Bootstrap for styling
 
