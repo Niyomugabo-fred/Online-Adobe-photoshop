@@ -1,1 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Adobe Photoshop</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    canvas {
+      border: 1px solid #ccc;
+      cursor: crosshair;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div class="max-w-6xl mx-auto py-10">
+    <h1 class="text-3xl font-bold text-center mb-6">Online Adobe Photoshop</h1>
 
+    <div class="flex flex-col md:flex-row gap-6">
+      <div class="w-full md:w-3/4">
+        <canvas id="canvas" width="800" height="500" class="bg-white shadow-md"></canvas>
+      </div>
+
+      <div class="w-full md:w-1/4 bg-white p-4 rounded shadow-md">
+        <h2 class="text-lg font-semibold mb-4">Tools</h2>
+        <div class="space-y-3">
+          <button onclick="setTool('brush')" class="w-full px-4 py-2 bg-blue-600 text-white rounded">Brush</button>
+          <button onclick="setTool('eraser')" class="w-full px-4 py-2 bg-red-600 text-white rounded">Eraser</button>
+          <input type="color" id="colorPicker" class="w-full h-10 border rounded" />
+          <input type="range" id="sizePicker" min="1" max="50" value="5" class="w-full">
+          <button onclick="clearCanvas()" class="w-full px-4 py-2 bg-yellow-500 text-white rounded">Clear</button>
+          <button onclick="downloadImage()" class="w-full px-4 py-2 bg-green-600 text-white rounded">Download</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    let painting = false;
+    let tool = "brush";
+    let brushColor = "#000000";
+    let brushSize = 5;
+
+    canvas.addEventListener("mousedown", startPosition);
+    canvas.addEventListener("mouseup", endPosition);
+    canvas.addEventListener("mousemove", draw);
+
+    document.getElementById("colorPicker").addEventListener("change", e => {
+      brushColor = e.target.value;
+    });
+
+    document.getElementById("sizePicker").addEventListener("input", e => {
+      brushSize = e.target.value;
+    });
+
+    function setTool(selectedTool) {
+      tool = selectedTool;
+    }
+
+    function startPosition(e) {
+      painting = true;
+      draw(e);
+    }
+
+    function endPosition() {
+      painting = false;
+      ctx.beginPath();
+    }
+
+    function draw(e) {
+      if (!painting) return;
+
+      ctx.lineWidth = brushSize;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = tool === 'eraser' ? '#ffffff' : brushColor;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function downloadImage() {
+      const link = document.createElement('a');
+      link.download = 'drawing.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+  </script>
+</body>
+</html>
